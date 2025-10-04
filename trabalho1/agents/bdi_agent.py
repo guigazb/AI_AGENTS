@@ -1,21 +1,11 @@
+import random
 from .base_vacuum_agent import BaseVacuumAgent
-from model import Acoes, Tipo_sujeira
+from environment import ACTIONS, DIRT_TYPES
 
 class BDIAgent(BaseVacuumAgent):
-    """Agente BDI: Crenças (modelo), Desejos (priorizar alta pontuação), Intenções (plano curto)."""
-    def __init__(self, unique_id, model):
-        super().__init__(unique_id, model)
+    """Agente BDI: Crenças, Desejos, Intenções."""
+    def __init__(self, env):
+        super().__init__(env)
         self.beliefs = {}  # pos -> info
         self.desires = []  # (pos, points)
         self.intentions = []  # lista de ações
-
-    def update_beliefs(self, perc):
-        
-
-    def select_desire(self):
-        
-    def plan_intention(self, target):
-        
-
-    def step(self):
-       

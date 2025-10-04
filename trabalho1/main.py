@@ -1,29 +1,55 @@
-import sys
-from model import ModeloApirador
+import copy
+import random
+import time
+from environment import VacuumEnvironment
+# from agents import (
+#    SimpleReactiveAgent,
+#    ModelBasedAgent,
+#    GoalBasedAgent,
+#    UtilityBasedAgent,
+#    BDIAgent
+#)
 from agents import (
-    SimpleReactiveAgent,
-    ModelBasedAgent,
-    GoalBasedAgent,
-    UtilityBasedAgent,
-    BDIAgent
+    SimpleReactiveAgent
 )
-from visualization import launch_server
 
-CLASSES_AGENTE = {
-    'SimpleReactiveAgent': SimpleReactiveAgent,
-    'ModelBasedAgent': ModelBasedAgent,
-    'GoalBasedAgent': GoalBasedAgent,
-    'UtilityBasedAgent': UtilityBasedAgent,
-    'BDIAgent': BDIAgent
-}
+def run_simulation(agent_class, agent_name, seed=42, visualize=False):
+    env_original = VacuumEnvironment(seed)  # Renomeei para clareza
+    agent = agent_class(copy.deepcopy(env_original))  # Agente usa cópia
+    steps = 0
+    if visualize:
+        print("Grid Inicial:")
+        agent.env.print_grid(agent_name)  # Usa agent.env
+    while agent.energy > 0 and not agent.stopped:
+        agent.step()
+        steps += 1
+        if visualize:
+            time.sleep(0.5)  # Delay para ver passos
+            print(f"Passo {steps}: Agente {agent_name}, Energia {agent.energy}, Pontos {agent.points_collected}")
+            agent.env.print_grid(agent_name)  # Usa agent.env
+    return {
+        'points': agent.points_collected,
+        'energy_left': agent.energy,
+        'steps': steps,
+        'cleaned_cells': agent.env.get_cleaned_cells()  # Usa agent.env
+    }
 
-def Compare_agentes():
-    Resultados = {}
-    for name, cls in CLASSES_AGENTE.items():
-        model = ModeloApirador(cls, seed=42)
-        Resultados[name] = model.run_simulation()
+def compare_agents(visualize=False):
+    #agent_types = {
+    #    'Reativo Simples': SimpleReactiveAgent,
+    #    'Baseado em Modelo': ModelBasedAgent,
+    #    'Baseado em Objetivos': GoalBasedAgent,
+    #    'Baseado em Utilidade': UtilityBasedAgent,
+    #    'BDI': BDIAgent
+    #}
+    agent_types = {
+        'Reativo Simples': SimpleReactiveAgent
+    }
+    results = {}
+    for name, cls in agent_types.items():
+        results[name] = run_simulation(cls, name, seed= random.randint(0, 1000), visualize=visualize)
     print("Comparação de Desempenho:")
-    for name, res in Resultados.items():
+    for name, res in results.items():
         print(f"\n{name}:")
         print(f"  Pontos coletados: {res['points']}")
         print(f"  Energia restante: {res['energy_left']}")
@@ -31,16 +57,4 @@ def Compare_agentes():
         print(f"  Células limpas: {res['cleaned_cells']}/25")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "--compare":
-            Compare_agentes()
-        elif sys.argv[1] == "--visualize" and len(sys.argv) > 2:
-            agent_name = sys.argv[2]
-            if agent_name in CLASSES_AGENTE:
-                launch_server(CLASSES_AGENTE[agent_name])
-            else:
-                print(f"Agente inválido. Opções: {list(CLASSES_AGENTE.keys())}")
-        else:
-            print("Uso: python main.py --compare | --visualize <NomeDoAgente>")
-    else:
-        print("Uso: python main.py --compare | --visualize <NomeDoAgente>")
+    compare_agents(visualize=True)  # Mude para False para execução rápida sem visualização

@@ -10,11 +10,11 @@ class SimpleReactiveAgent(BaseVacuumAgent):
         if perc['center']['dirt']:
             self.vacuum()
         else:
-            dirty_dirs = [d for d, info in perc.items() if d not in ['position', 'center'] and info['dirt']]
+            dirty_dirs = [d for d, info in perc.items() if d in ['N', 'S', 'L', 'O'] and info['dirt']]
             if dirty_dirs:
                 self.move(random.choice(dirty_dirs))
             else:
-                possible_moves = [d for d, info in perc.items() if d not in ['position', 'center'] and not info['obstacle']]
+                possible_moves = [d for d, info in perc.items() if d in ['N', 'S', 'L', 'O'] and not info['obstacle']]
                 if possible_moves:
                     self.move(random.choice(possible_moves))
                 else:
