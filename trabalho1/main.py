@@ -10,19 +10,39 @@ from environment import VacuumEnvironment
 #    BDIAgent
 #)
 from agents import (
-    SimpleReactiveAgent
+    SimpleReactiveAgent,
+    ModelBasedAgent,
+    GoalBasedAgent
 )
 
-def run_simulation(agent_class, agent_name, seed=42, visualize=False):
-    env_original = VacuumEnvironment(seed)  # Renomeei para clareza
-    agent = agent_class(copy.deepcopy(env_original))  # Agente usa cópia
+def run_simulation(agent_class, agent_name, env, visualize=False, max_same_state=4):
+    agent = agent_class(copy.deepcopy(env))  # Agente usa cópia
     steps = 0
     if visualize:
         print("Grid Inicial:")
         agent.env.print_grid(agent_name)  # Usa agent.env
+    prev_sig = None
+    same_sig_count = 0
     while agent.energy > 0 and not agent.stopped:
         agent.step()
         steps += 1
+        try:
+            sig = agent.state_signature()
+        except Exception:
+
+            sig = (agent.pos, agent.energy, agent.points_collected)
+
+        if sig == prev_sig:
+            same_sig_count += 1
+        else:
+            prev_sig = sig
+            same_sig_count = 0
+        if same_sig_count >= max_same_state:
+            print(f"Estado inalterado, encerrando")
+            agent.stop()
+            break
+
+
         if visualize:
             time.sleep(0.5)  # Delay para ver passos
             print(f"Passo {steps}: Agente {agent_name}, Energia {agent.energy}, Pontos {agent.points_collected}")
@@ -34,7 +54,7 @@ def run_simulation(agent_class, agent_name, seed=42, visualize=False):
         'cleaned_cells': agent.env.get_cleaned_cells()  # Usa agent.env
     }
 
-def compare_agents(visualize=False):
+def compare_agents(visualize=False, seed=50):
     #agent_types = {
     #    'Reativo Simples': SimpleReactiveAgent,
     #    'Baseado em Modelo': ModelBasedAgent,
@@ -43,11 +63,14 @@ def compare_agents(visualize=False):
     #    'BDI': BDIAgent
     #}
     agent_types = {
-        'Reativo Simples': SimpleReactiveAgent
+        'Reativo Simples': SimpleReactiveAgent,
+        'Baseado em modelo': ModelBasedAgent,
+        'Baseado em objetivos': GoalBasedAgent
     }
+    base_env = VacuumEnvironment(seed)
     results = {}
     for name, cls in agent_types.items():
-        results[name] = run_simulation(cls, name, seed= random.randint(0, 1000), visualize=visualize)
+        results[name] = run_simulation(cls, name, base_env, visualize=visualize)
     print("Comparação de Desempenho:")
     for name, res in results.items():
         print(f"\n{name}:")
