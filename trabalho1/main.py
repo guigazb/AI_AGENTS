@@ -12,8 +12,6 @@ from agents import (
 
 def run_simulation(agent_class, agent_name, env, visualize=False, max_same_state=4):
     agent = agent_class(copy.deepcopy(env))  # Agente usa cópia
-def run_simulation(agent_class, agent_name, env, visualize=False, max_same_state=4):
-    agent = agent_class(copy.deepcopy(env))  # Agente usa cópia
     steps = 0
     if visualize:
         print("Grid Inicial:")
@@ -81,7 +79,6 @@ def compare_agents(visualize=False, seed=50):
     base_env = VacuumEnvironment(seed)
     results = {}
     for name, cls in agent_types.items():
-        results[name] = run_simulation(cls, name, base_env, visualize=visualize)
         results[name] = run_simulation(cls, name, base_env, visualize=visualize)
     print("Comparação de Desempenho:")
     for name, res in results.items():
