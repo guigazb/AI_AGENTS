@@ -12,15 +12,36 @@ from agents import (
 
 def run_simulation(agent_class, agent_name, env, visualize=False, max_same_state=4):
     agent = agent_class(copy.deepcopy(env))  # Agente usa cópia
+def run_simulation(agent_class, agent_name, env, visualize=False, max_same_state=4):
+    agent = agent_class(copy.deepcopy(env))  # Agente usa cópia
     steps = 0
     if visualize:
         print("Grid Inicial:")
         agent.env.print_grid(agent_name)  # Usa agent.env
     prev_sig = None
     same_sig_count = 0
+    prev_sig = None
+    same_sig_count = 0
     while agent.energy > 0 and not agent.stopped:
         agent.step()
         steps += 1
+        try:
+            sig = agent.state_signature()
+        except Exception:
+
+            sig = (agent.pos, agent.energy, agent.points_collected)
+
+        if sig == prev_sig:
+            same_sig_count += 1
+        else:
+            prev_sig = sig
+            same_sig_count = 0
+        if same_sig_count >= max_same_state:
+            print(f"Estado inalterado, encerrando")
+            agent.stop()
+            break
+
+
         try:
             sig = agent.state_signature()
         except Exception:
@@ -60,6 +81,7 @@ def compare_agents(visualize=False, seed=50):
     base_env = VacuumEnvironment(seed)
     results = {}
     for name, cls in agent_types.items():
+        results[name] = run_simulation(cls, name, base_env, visualize=visualize)
         results[name] = run_simulation(cls, name, base_env, visualize=visualize)
     print("Comparação de Desempenho:")
     for name, res in results.items():

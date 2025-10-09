@@ -48,11 +48,12 @@ class BaseVacuumAgent:
 
     def vacuum(self):
         """Aspirar a célula atual."""
-        cell = self.env.grid[self.pos[0]][self.pos[1]]
-        if cell['dirt']:
-            self.points_collected += DIRT_TYPES[cell['dirt']]
-            cell['dirt'] = None
-            self.energy -= 2
+        if self.energy >=2:
+            cell = self.env.grid[self.pos[0]][self.pos[1]]
+            if cell['dirt']:
+                self.points_collected += DIRT_TYPES[cell['dirt']]
+                cell['dirt'] = None
+                self.energy -= 2
 
     def stop(self):
         """Parar a execução."""
